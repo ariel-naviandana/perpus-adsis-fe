@@ -18,7 +18,6 @@
                 <th>Judul</th>
                 <th>Penulis</th>
                 <th>Kategori</th>
-                <th>Tahun Terbit</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -28,9 +27,17 @@
                 <td>{{ $book['title'] }}</td>
                 <td>{{ $book['author'] }}</td>
                 <td>{{ $book['category'] }}</td>
-                <td>{{ $book['year'] }}</td>
                 <td>
-                    <button class="btn btn-sm btn-warning btn-edit" data-id="{{ $book['id'] }}" data-bs-toggle="modal" data-bs-target="#bookModal">Edit</button>
+                    <button class="btn btn-sm btn-warning btn-edit"
+                        data-id="{{ $book['id'] }}"
+                        data-title="{{ $book['title'] }}"
+                        data-author="{{ $book['author'] }}"
+                        data-category="{{ $book['category'] }}"
+                        data-file_path="{{ $book['file_path'] ?? '' }}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#bookModal">
+                        Edit
+                    </button>
                     <form action="{{ route('manage.books.destroy', $book['id']) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Yakin hapus buku ini?')">
                         @csrf
                         @method('DELETE')
@@ -68,19 +75,16 @@
                     <label for="category" class="form-label">Kategori</label>
                     <select class="form-select" id="category" name="category" required>
                         <option value="">Pilih Kategori</option>
-                        <option value="Novel">Novel</option>
                         <option value="Teknologi">Teknologi</option>
+                        <option value="Sastra">Sastra</option>
                         <option value="Sejarah">Sejarah</option>
-                        <option value="Lainnya">Lainnya</option>
+                        <option value="Matematika">Matematika</option>
+                        <option value="Agama">Agama</option>
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="year" class="form-label">Tahun Terbit</label>
-                    <input type="number" class="form-control" id="year" name="year" min="1900" max="{{ date('Y') }}" required />
-                </div>
-                <div class="mb-3">
-                    <label for="pdf_url" class="form-label">URL PDF</label>
-                    <input type="url" class="form-control" id="pdf_url" name="pdf_url" required />
+                    <label for="file_path" class="form-label">URL PDF</label>
+                    <input type="url" class="form-control" id="file_path" name="file_path" required />
                 </div>
           </div>
           <div class="modal-footer">
@@ -91,10 +95,9 @@
     </form>
   </div>
 </div>
-
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const bookModal = document.getElementById('bookModal');
@@ -103,28 +106,41 @@ document.addEventListener('DOMContentLoaded', function () {
     const formMethod = document.getElementById('formMethod');
     const bookIdInput = document.getElementById('bookId');
 
-    document.querySelectorAll('.btn-edit').forEach(button => {
-        button.addEventListener('click', function () {
-            const tr = this.closest('tr');
+    bookModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+
+        if (!button || !button.classList.contains('btn-edit')) {
+            modalTitle.textContent = 'Tambah Buku';
+            bookForm.action = "{{ route('manage.books.store') }}";
+            formMethod.value = 'POST';
+            bookIdInput.value = '';
+            bookForm.reset();
+        } else {
             modalTitle.textContent = 'Edit Buku';
+            const id = button.getAttribute('data-id');
+            const title = button.getAttribute('data-title');
+            const author = button.getAttribute('data-author');
+            const category = button.getAttribute('data-category');
+            const file_path = button.getAttribute('data-file_path') || '';
+
+            bookForm.action = `/manage/books/${id}`;
             formMethod.value = 'PUT';
-            bookForm.action = `/manage/books/${this.dataset.id}`;
-            bookIdInput.value = this.dataset.id;
-            document.getElementById('title').value = tr.children[0].textContent.trim();
-            document.getElementById('author').value = tr.children[1].textContent.trim();
-            document.getElementById('category').value = tr.children[2].textContent.trim();
-            document.getElementById('year').value = tr.children[3].textContent.trim();
-            document.getElementById('pdf_url').value = '';
-        });
+            bookIdInput.value = id;
+
+            document.getElementById('title').value = title;
+            document.getElementById('author').value = author;
+            document.getElementById('category').value = category;
+            document.getElementById('file_path').value = file_path;
+        }
     });
 
-    document.getElementById('btnAddBook').addEventListener('click', () => {
+    document.getElementById('btnAddBook').addEventListener('click', function() {
+        bookForm.reset();
         modalTitle.textContent = 'Tambah Buku';
         formMethod.value = 'POST';
         bookForm.action = "{{ route('manage.books.store') }}";
         bookIdInput.value = '';
-        bookForm.reset();
     });
 });
 </script>
-@endsection
+@endpush

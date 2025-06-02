@@ -10,7 +10,7 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#userModal" id="btnAddUser">Tambah User</button>
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal" id="btnAddUser">Tambah User</button>
 
     <table class="table table-bordered">
         <thead class="table-light">
@@ -22,13 +22,21 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($users as $user)
+            @forelse($users as $user)
             <tr>
-                <td>{{ $user['name'] }}</td>
-                <td>{{ $user['email'] }}</td>
-                <td>{{ ucfirst($user['role']) }}</td>
+                <td>{{ $user['name'] ?? '-' }}</td>
+                <td>{{ $user['email'] ?? '-' }}</td>
+                <td>{{ ucfirst($user['role'] ?? '-') }}</td>
                 <td>
-                    <button class="btn btn-sm btn-warning btn-edit" data-id="{{ $user['id'] }}" data-bs-toggle="modal" data-bs-target="#userModal">Edit</button>
+                    <button class="btn btn-sm btn-warning btn-edit"
+                        data-id="{{ $user['id'] }}"
+                        data-name="{{ $user['name'] }}"
+                        data-email="{{ $user['email'] }}"
+                        data-role="{{ $user['role'] }}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editUserModal">
+                        Edit
+                    </button>
                     <form action="{{ route('manage.users.destroy', $user['id']) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Yakin hapus user ini?')">
                         @csrf
                         @method('DELETE')
@@ -36,91 +44,122 @@
                     </form>
                 </td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="4" class="text-center">Tidak ada data user.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
 
-<!-- Modal Form User -->
-<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="userForm" method="POST" action="{{ route('manage.users.store') }}">
-        @csrf
-        <input type="hidden" name="_method" id="formMethod" value="POST" />
-        <input type="hidden" name="user_id" id="userId" />
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="userModalLabel">Tambah User</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Nama</label>
-                    <input type="text" class="form-control" id="name" name="name" required />
+<!-- Modal Tambah User -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="addUserForm" method="POST" action="{{ route('manage.users.store') }}">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Tambah User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="add_name" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="add_name" name="name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="add_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="add_email" name="email" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="add_password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="add_password" name="password" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="add_role" class="form-label">Role</label>
+                        <select class="form-select" id="add_role" name="role" required>
+                            <option value="">Pilih Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="petugas">Petugas</option>
+                            <option value="siswa">Siswa</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="mb-3" id="passwordField">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required />
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                 </div>
-                <div class="mb-3">
-                    <label for="role" class="form-label">Role</label>
-                    <select class="form-select" id="role" name="role" required>
-                        <option value="">Pilih Role</option>
-                        <option value="admin">Admin</option>
-                        <option value="petugas">Petugas</option>
-                        <option value="user">User</option>
-                    </select>
-                </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary" id="btnSubmit">Simpan</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-          </div>
-        </div>
-    </form>
-  </div>
+            </div>
+        </form>
+    </div>
 </div>
 
+<!-- Modal Edit User -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="editUserForm" method="POST" action="">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="user_id" id="edit_userId" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="edit_name" name="name" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="email" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_role" class="form-label">Role</label>
+                        <select class="form-select" id="edit_role" name="role" required>
+                            <option value="">Pilih Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="petugas">Petugas</option>
+                            <option value="siswa">Siswa</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const userModal = document.getElementById('userModal');
-    const userForm = document.getElementById('userForm');
-    const modalTitle = document.getElementById('userModalLabel');
-    const formMethod = document.getElementById('formMethod');
-    const userIdInput = document.getElementById('userId');
-    const passwordField = document.getElementById('passwordField');
-
-    document.querySelectorAll('.btn-edit').forEach(button => {
-        button.addEventListener('click', function () {
-            const tr = this.closest('tr');
-            modalTitle.textContent = 'Edit User';
-            formMethod.value = 'PUT';
-            userForm.action = `/manage/users/${this.dataset.id}`;
-            userIdInput.value = this.dataset.id;
-            document.getElementById('name').value = tr.children[0].textContent.trim();
-            document.getElementById('email').value = tr.children[1].textContent.trim();
-            document.getElementById('role').value = tr.children[2].textContent.trim().toLowerCase();
-            passwordField.style.display = 'none'; // sembunyikan password saat edit
-            document.getElementById('password').removeAttribute('required');
-        });
+    document.getElementById('btnAddUser').addEventListener('click', function () {
+        document.getElementById('addUserForm').reset();
     });
 
-    document.getElementById('btnAddUser').addEventListener('click', () => {
-        modalTitle.textContent = 'Tambah User';
-        formMethod.value = 'POST';
-        userForm.action = "{{ route('manage.users.store') }}";
-        userIdInput.value = '';
-        userForm.reset();
-        passwordField.style.display = 'block';
-        document.getElementById('password').setAttribute('required', 'required');
-    });
+    var editUserModal = document.getElementById('editUserModal');
+    if (editUserModal) {
+      editUserModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        if (!button) return;
+        const userId = button.getAttribute('data-id');
+        const userName = button.getAttribute('data-name');
+        const userEmail = button.getAttribute('data-email');
+        const userRole = button.getAttribute('data-role');
+        const form = document.getElementById('editUserForm');
+        form.setAttribute('action', `/manage/users/${userId}`);
+        document.getElementById('edit_userId').value = userId;
+        document.getElementById('edit_name').value = userName;
+        document.getElementById('edit_email').value = userEmail;
+        document.getElementById('edit_role').value = userRole;
+      });
+    }
 });
 </script>
-@endsection
+@endpush

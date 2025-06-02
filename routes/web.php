@@ -14,16 +14,6 @@ Route::get('/', function () {
 });
 
 Route::get('/login', function () {
-    if (!session('api_token') || !session('user_role')) {
-        $role = session('user_role');
-        if ($role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } elseif ($role === 'petugas') {
-            return redirect()->route('manage.books');
-        } else {
-            return redirect()->route('user.home');
-        }
-    }
     return view('auth.login');
 })->name('login');
 

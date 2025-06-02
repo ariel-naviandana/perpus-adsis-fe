@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
@@ -32,6 +33,9 @@ class AuthController extends Controller
             if ($response->successful() && isset($data['token'])) {
                 session(['api_token' => $data['token'], 'user_role' => $data['user']['role']]);
 
+                Session::put('api_token', $data['token']);
+                Session::put('user_role', $data['user']['role']);
+
                 $redirectUrl = match ($data['user']['role']) {
                     'admin' => route('admin.dashboard'),
                     'petugas' => route('manage.books'),
@@ -58,7 +62,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->session()->flush();
+        Session::flush();
         return redirect()->route('login');
     }
 }

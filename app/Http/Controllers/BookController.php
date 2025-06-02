@@ -17,7 +17,7 @@ class BookController extends Controller
 
         if ($response->successful()) {
             $books = $response->json();
-            return view('user.home', compact('books'));
+            return view('home', compact('books'));
         } else {
             return redirect()->route('login')->with('error', 'Gagal mengambil data buku.');
         }

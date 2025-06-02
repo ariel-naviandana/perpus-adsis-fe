@@ -7,16 +7,16 @@ use Illuminate\Http\Request;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, $roles)
     {
-        if (!session('api_token') || !session('user_role')) {
-            return redirect()->route('login');
-        }
-
+        // Split roles dengan tanda '-'
+        $rolesArray = explode('-', $roles);
+        // Ambil role dari session FE, bukan dari $request->user()
         $userRole = session('user_role');
 
-        if (!in_array($userRole, $roles)) {
-            abort(403, 'Unauthorized access.');
+        if (!$userRole || !in_array($userRole, $rolesArray)) {
+            // Untuk web, lebih baik redirect ke login, bukan response JSON
+            return redirect()->route('login');
         }
 
         return $next($request);

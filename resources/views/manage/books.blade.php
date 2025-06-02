@@ -84,7 +84,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="file_path" class="form-label">URL PDF</label>
-                    <input type="url" class="form-control" id="file_path" name="file_path" required />
+                    <input type="text" class="form-control" id="file_path" name="file_path" required />
                 </div>
           </div>
           <div class="modal-footer">

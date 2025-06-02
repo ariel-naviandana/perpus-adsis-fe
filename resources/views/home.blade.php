@@ -4,11 +4,20 @@
 <div class="container mt-4">
     <h2>Daftar Buku</h2>
 
-    <div class="list-group">
+    <div class="row g-3">
         @foreach($books as $book)
-        <button type="button" class="list-group-item list-group-item-action" onclick="showBookDetail({{ $book['id'] }})">
-            {{ $book['title'] }} - {{ $book['author'] }}
-        </button>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-2">{{ $book['title'] }}</h5>
+                    <p class="card-text mb-1"><strong>Penulis:</strong> {{ $book['author'] }}</p>
+                    <p class="card-text mb-1"><strong>Kategori:</strong> {{ $book['category'] }}</p>
+                    <button type="button" class="btn btn-primary mt-auto" onclick="showBookDetail({{ $book['id'] }})">
+                        Detail
+                    </button>
+                </div>
+            </div>
+        </div>
         @endforeach
     </div>
 </div>
@@ -29,7 +38,7 @@
         <p id="bookDescription"></p>
       </div>
       <div class="modal-footer">
-        <a href="#" id="downloadBtn" class="btn btn-primary" target="_blank">Download PDF</a>
+        <a href="#" id="downloadBtn" class="btn btn-primary" download>Download PDF</a>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
       </div>
     </div>
@@ -40,6 +49,7 @@
 <script>
     function showBookDetail(bookId) {
         const token = '{{ session("api_token") }}';
+        const baseUrl = "{{ url('') }}";
         const apiBaseUrl = "{{ config('app.api_base_url') }}";
 
         axios.get(`${apiBaseUrl}/books/${bookId}`, {
@@ -54,7 +64,8 @@
             document.getElementById('bookAuthor').innerText = book.author;
             document.getElementById('bookCategory').innerText = book.category;
             document.getElementById('bookDescription').innerText = book.description;
-            document.getElementById('downloadBtn').href = `${apiBaseUrl}/books/${book.id}/download`;
+
+            document.getElementById('downloadBtn').href = baseUrl + '/books/download/' + book.id;
 
             var myModal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
             myModal.show();

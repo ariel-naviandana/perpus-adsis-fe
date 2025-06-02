@@ -36,6 +36,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Siswa only
 Route::middleware(RoleMiddleware::class . ':siswa')->group(function () {
     Route::get('/home', [BookController::class, 'userHome'])->name('user.home');
+    Route::get('/books/download/{id}', [BookController::class, 'download'])->name('books.download');
 });
 
 // Admin & Petugas: manage buku

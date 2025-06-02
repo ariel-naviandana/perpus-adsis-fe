@@ -15,34 +15,30 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        @auth
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                @if(auth()->user()->role === 'user')
+                @if(session('user_role') === 'user')
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('home') }}">Daftar Buku</a>
+                        <a class="nav-link" href="{{ route('user.home') }}">Daftar Buku</a>
                     </li>
-                @elseif(auth()->user()->role === 'petugas')
+                @elseif(session('user_role') === 'petugas')
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('books.manage') }}">Manajemen Buku</a>
+                        <a class="nav-link" href="{{ route('manage.books') }}">Manajemen Buku</a>
                     </li>
-                @elseif(auth()->user()->role === 'admin')
+                @elseif(session('user_role') === 'admin')
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('admin.dashboard') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('books.manage') }}">Manajemen Buku</a>
+                        <a class="nav-link" href="{{ route('manage.books') }}">Manajemen Buku</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('users.manage') }}">Manajemen User</a>
+                        <a class="nav-link" href="{{ route('manage.users') }}">Manajemen User</a>
                     </li>
                 @endif
             </ul>
 
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <span class="nav-link">{{ auth()->user()->name }} ({{ auth()->user()->role }})</span>
-                </li>
                 <li class="nav-item">
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
                         @csrf
@@ -53,7 +49,6 @@
                 </li>
             </ul>
         </div>
-        @endauth
     </div>
 </nav>
 
